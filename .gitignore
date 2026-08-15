@@ -1,0 +1,13 @@
+# Xcode / XcodeGen生成物
+*.xcodeproj
+Generated/
+DerivedData/
+build/
+*.xcworkspace
+.build/
+
+# macOS
+.DS_Store
+
+# Codemagic
+/tmp/xcodebuild_logs/

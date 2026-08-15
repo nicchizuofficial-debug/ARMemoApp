@@ -1,0 +1,35 @@
+name: ARMemoApp
+options:
+  bundleIdPrefix: com.nicchizu
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+configs:
+  Debug: debug
+  Release: release
+targets:
+  ARMemoApp:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: ARMemoApp
+    info:
+      path: Generated/Info.plist
+      properties:
+        CFBundleDisplayName: "AR Memo"
+        UILaunchScreen: {}
+        UIRequiresFullScreen: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        NSCameraUsageDescription: "現実空間にメモを配置・表示するためにカメラを使用します。"
+        UIRequiredDeviceCapabilities:
+          - arm64
+          - arkit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nicchizu.armemoapp
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "5.0"
+        CODE_SIGN_STYLE: Automatic
+        SUPPORTS_MACCATALYST: false

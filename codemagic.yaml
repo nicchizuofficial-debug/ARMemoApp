@@ -1,0 +1,76 @@
+workflows:
+  # 署名なしのビルド検証ワークフロー。Apple Developer Programへの登録が
+  # まだでも、push のたびにコンパイルが通るかどうかを確認できます。
+  ios-build-check:
+    name: "AR Memo - Build Check (No Signing)"
+    max_build_duration: 30
+    instance_type: mac_mini_m2
+    environment:
+      vars:
+        XCODE_SCHEME: "ARMemoApp"
+      xcode: latest
+    scripts:
+      - name: Install XcodeGen
+        script: |
+          brew install xcodegen
+      - name: Generate Xcode project
+        script: |
+          cd $CM_BUILD_DIR/ARMemoApp
+          xcodegen generate
+      - name: Build for generic iOS device (no code signing)
+        script: |
+          cd $CM_BUILD_DIR/ARMemoApp
+          xcodebuild build \
+            -project ARMemoApp.xcodeproj \
+            -scheme "$XCODE_SCHEME" \
+            -destination "generic/platform=iOS" \
+            CODE_SIGNING_ALLOWED=NO
+
+  # 実機インストール用の署名付きIPAビルド。
+  # ARKitはシミュレータのカメラでは動作しないため、実機確認にはこちらが必要です。
+  # 事前準備（Codemagicの管理画面）:
+  #   1. Apple Developer Programに登録したチームでApp Store Connect API Keyを発行し、
+  #      Codemagic > Team settings > Integrations > Apple Developer Portal に登録する
+  #      （登録名を下記 integrations.app_store_connect と合わせる。例: "codemagic_api_key"）
+  #   2. bundle_identifier (com.nicchizu.armemoapp) をApple Developerポータルで払い出す
+  ios-device-build:
+    name: "AR Memo - iOS Device Build (Ad Hoc)"
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: codemagic_api_key
+    environment:
+      ios_signing:
+        distribution_type: ad_hoc
+        bundle_identifier: com.nicchizu.armemoapp
+      vars:
+        XCODE_SCHEME: "ARMemoApp"
+      xcode: latest
+    scripts:
+      - name: Install XcodeGen
+        script: |
+          brew install xcodegen
+      - name: Generate Xcode project
+        script: |
+          cd $CM_BUILD_DIR/ARMemoApp
+          xcodegen generate
+      - name: Set up code signing settings
+        script: |
+          cd $CM_BUILD_DIR/ARMemoApp
+          xcode-project use-profiles
+      - name: Build ipa
+        script: |
+          cd $CM_BUILD_DIR/ARMemoApp
+          xcode-project build-ipa \
+            --project "ARMemoApp.xcodeproj" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - ARMemoApp/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      email:
+        recipients:
+          - nicchizu.official@gmail.com
+        notify:
+          success: true
+          failure: true
