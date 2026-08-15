@@ -27,18 +27,21 @@ workflows:
   # 実機インストール用の署名付きIPAビルド。
   # ARKitはシミュレータのカメラでは動作しないため、実機確認にはこちらが必要です。
   # 事前準備（Codemagicの管理画面）:
-  #   1. Apple Developer Programに登録したチームでApp Store Connect API Keyを
-  #      「Admin」ロールで発行し（証明書・プロファイルの作成にAdmin権限が必要）、
+  #   1. Apple Developer Programに登録したチームでApp Store Connect API Keyを発行し、
   #      Codemagic > Team settings > Integrations > Apple Developer Portal に登録する
-  #      （登録名を下記 integrations.app_store_connect と合わせる。現在は "codemagic-admin"）
+  #      （登録名を下記 integrations.app_store_connect と合わせる。現在は "Codemagic"）
   #   2. bundle_identifier (com.nicchizu.armemoapp) をApple Developerポータルで払い出す
+  #   3. Apple Distribution証明書の再利用のため、既存の "certificate_credentials"
+  #      変数グループ（CERTIFICATE_PRIVATE_KEYを含む）をこのワークフローでも読み込む
   ios-device-build:
     name: "AR Memo - iOS Device Build (Ad Hoc)"
     max_build_duration: 60
     instance_type: mac_mini_m2
     integrations:
-      app_store_connect: codemagic-admin
+      app_store_connect: Codemagic
     environment:
+      groups:
+        - certificate_credentials
       ios_signing:
         distribution_type: ad_hoc
         bundle_identifier: com.nicchizu.armemoapp
