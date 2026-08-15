@@ -44,6 +44,7 @@ workflows:
         bundle_identifier: com.nicchizu.armemoapp
       vars:
         XCODE_SCHEME: "ARMemoApp"
+        BUNDLE_ID: "com.nicchizu.armemoapp"
       xcode: latest
     scripts:
       - name: Install XcodeGen
