@@ -26,24 +26,24 @@ workflows:
 
   # 実機インストール用の署名付きIPAビルド。
   # ARKitはシミュレータのカメラでは動作しないため、実機確認にはこちらが必要です。
+  # Apple Distribution証明書は1アカウント2枚までの上限があり、他プロジェクトで
+  # 既に消費されている可能性があるため、上限が緩いApple Development証明書
+  # （development配布）を使って実機に直接インストールする方式にしている。
   # 事前準備（Codemagicの管理画面）:
   #   1. Apple Developer Programに登録したチームでApp Store Connect API Keyを発行し、
   #      Codemagic > Team settings > Integrations > Apple Developer Portal に登録する
   #      （登録名を下記 integrations.app_store_connect と合わせる。現在は "Codemagic"）
   #   2. bundle_identifier (com.nicchizu.armemoapp) をApple Developerポータルで払い出す
-  #   3. Apple Distribution証明書の再利用のため、既存の "certificate_credentials"
-  #      変数グループ（CERTIFICATE_PRIVATE_KEYを含む）をこのワークフローでも読み込む
+  #   3. 実機のUDIDをApple Developer Portal > Devices に登録する
   ios-device-build:
-    name: "AR Memo - iOS Device Build (Ad Hoc)"
+    name: "AR Memo - iOS Device Build (Development)"
     max_build_duration: 60
     instance_type: mac_mini_m2
     integrations:
       app_store_connect: Codemagic
     environment:
-      groups:
-        - certificate_credentials
       ios_signing:
-        distribution_type: ad_hoc
+        distribution_type: development
         bundle_identifier: com.nicchizu.armemoapp
       vars:
         XCODE_SCHEME: "ARMemoApp"
@@ -62,7 +62,7 @@ workflows:
       - name: Fetch signing files
         script: |
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_ADHOC \
+            --type IOS_APP_DEVELOPMENT \
             --create
       - name: Add certificates to keychain
         script: |
