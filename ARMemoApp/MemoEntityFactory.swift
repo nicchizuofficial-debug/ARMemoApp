@@ -41,7 +41,6 @@ enum MemoEntityFactory {
         container.components.set(
             CollisionComponent(shapes: [.generateBox(size: SIMD3<Float>(width, height, 0.02))])
         )
-        container.components.set(InputTargetComponent())
 
         return container
     }

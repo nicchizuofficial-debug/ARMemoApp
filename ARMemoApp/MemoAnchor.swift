@@ -3,7 +3,7 @@ import ARKit
 /// メモの内容・色をARWorldMapと一緒に保存/復元するためのARAnchorサブクラス。
 /// NSSecureCodingに準拠させることで、ARWorldMapのアーカイブに含めて
 /// ローカルへ保存し、次回起動時に復元できる。
-final class MemoAnchor: ARAnchor {
+final class MemoAnchor: ARAnchor, @unchecked Sendable {
     let text: String
     let textColorHex: String
     let backgroundColorHex: String
