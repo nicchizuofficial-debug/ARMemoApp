@@ -84,7 +84,8 @@ final class ARViewModel: NSObject, ObservableObject {
         while let entity = current {
             if entity.name == "MemoContainer",
                let anchorEntity = entity.anchor,
-               let memoAnchor = memoAnchorsByID[anchorEntity.anchorIdentifier] {
+               let anchorID = anchorEntity.anchorIdentifier,
+               let memoAnchor = memoAnchorsByID[anchorID] {
                 selectedMemoForAction = memoAnchor
                 return
             }
