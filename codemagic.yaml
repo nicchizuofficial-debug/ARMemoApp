@@ -15,11 +15,9 @@ workflows:
           brew install xcodegen
       - name: Generate Xcode project
         script: |
-          cd $CM_BUILD_DIR/ARMemoApp
           xcodegen generate
       - name: Build for generic iOS device (no code signing)
         script: |
-          cd $CM_BUILD_DIR/ARMemoApp
           xcodebuild build \
             -project ARMemoApp.xcodeproj \
             -scheme "$XCODE_SCHEME" \
@@ -52,20 +50,17 @@ workflows:
           brew install xcodegen
       - name: Generate Xcode project
         script: |
-          cd $CM_BUILD_DIR/ARMemoApp
           xcodegen generate
       - name: Set up code signing settings
         script: |
-          cd $CM_BUILD_DIR/ARMemoApp
           xcode-project use-profiles
       - name: Build ipa
         script: |
-          cd $CM_BUILD_DIR/ARMemoApp
           xcode-project build-ipa \
             --project "ARMemoApp.xcodeproj" \
             --scheme "$XCODE_SCHEME"
     artifacts:
-      - ARMemoApp/build/ios/ipa/*.ipa
+      - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
     publishing:
       email:
