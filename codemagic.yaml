@@ -29,17 +29,14 @@ workflows:
   # Ad Hoc/Development配信は実機のUDID事前登録が必要で扱いが煩雑なため、
   # 他プロジェクト（kaudoki等）と同じくTestFlight経由（app_store配信）で
   # 実機にインストールする方式にしている。デバイス登録は不要。
-  # 事前準備（Codemagicの管理画面 / App Store Connect）:
-  #   1. Apple Developer Programに登録したチームでApp Store Connect API Keyを発行し、
-  #      Codemagic > Team settings > Integrations > Apple Developer Portal に登録する
-  #      （登録名を下記 integrations.app_store_connect と合わせる。現在は "Codemagic"）
-  #   2. bundle_identifier (com.nicchizu.armemoapp) をApple Developerポータルで払い出す
-  #   3. App Store Connectで、同じBundle IDのApp（TestFlight配信先）を作成しておく
   #
-  # NOTE: environment.ios_signing の distribution_type/bundle_identifier を使う
-  # 「自動」方式では、証明書・プロファイルの取得はCodemagicがビルド開始前に
-  # 裏側で自動的に行う。app-store-connect fetch-signing-files を自分のscriptsで
-  # 明示的に呼ぶ「手動」方式と混在させると状態が壊れるため、自動方式のみを使う。
+  # 署名は「手動」方式（Codemagicにアップロード済みの証明書・プロファイルを
+  # 参照名で指定）を使う。「自動」方式（ios_signing.distribution_type +
+  # bundle_identifier）はアカウント内の配布証明書の枚数上限に度々引っかかり
+  # 安定しなかったため、事前に手動で作成・アップロードした証明書
+  # （Reference name: armemoapp_distribution）とプロビジョニングプロファイル
+  # （Reference name: armemoapp_appstore_profile）を明示的に使う。
+  # アップロード場所: Codemagic > Personal Account settings > Code signing identities
   ios-device-build:
     name: "AR Memo - iOS TestFlight Build"
     max_build_duration: 60
@@ -48,8 +45,10 @@ workflows:
       app_store_connect: Codemagic
     environment:
       ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.nicchizu.armemoapp
+        provisioning_profiles:
+          - armemoapp_appstore_profile
+        certificates:
+          - armemoapp_distribution
       vars:
         XCODE_SCHEME: "ARMemoApp"
         BUNDLE_ID: "com.nicchizu.armemoapp"
