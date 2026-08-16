@@ -44,7 +44,8 @@ final class ARViewModel: NSObject, ObservableObject {
             let direction = cameraPosition - containerPosition
             guard direction.x != 0 || direction.z != 0 else { continue }
             let yaw = atan2(direction.x, direction.z)
-            container.orientation = simd_quatf(angle: yaw, axis: SIMD3<Float>(0, 1, 0))
+            let worldOrientation = simd_quatf(angle: yaw, axis: SIMD3<Float>(0, 1, 0))
+            container.setOrientation(worldOrientation, relativeTo: nil)
         }
     }
 
