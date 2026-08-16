@@ -4,6 +4,8 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var viewModel = ARViewModel()
     @State private var isListPresented = false
+    @State private var isOnboardingPresented = false
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
 
     var body: some View {
         ZStack {
@@ -29,6 +31,15 @@ struct ContentView: View {
                     .padding(.bottom, 36)
             }
             .animation(.easeInOut(duration: 0.2), value: viewModel.statusMessage)
+        }
+        .onAppear {
+            if !hasSeenOnboarding {
+                isOnboardingPresented = true
+                hasSeenOnboarding = true
+            }
+        }
+        .sheet(isPresented: $isOnboardingPresented) {
+            OnboardingView()
         }
         .sheet(isPresented: $viewModel.isModalPresented) {
             MemoInputView(
@@ -79,6 +90,9 @@ struct ContentView: View {
             }
             ToolbarIconButton(systemImage: "square.and.arrow.up") {
                 viewModel.loadWorldMap()
+            }
+            ToolbarIconButton(systemImage: "questionmark.circle") {
+                isOnboardingPresented = true
             }
             Spacer()
             ToolbarIconButton(systemImage: "list.bullet") {

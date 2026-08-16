@@ -17,6 +17,13 @@
 "Place Memo" = "メモを配置";
 "Place" = "配置する";
 
+/* OnboardingView */
+"How mARk Works" = "mARkの使い方";
+"Got it" = "はじめる";
+"Point the center cursor at a desk or wall, then tap Add Memo to place a note there." = "画面中央のカーソルを机や壁に合わせて、「メモを追加」をタップするとそこにメモを配置できます。";
+"Saves the shape of the space you're looking at, along with the position of every memo in it." = "今見ている空間の形状と、その中にあるすべてのメモの位置を保存します。";
+"Restores a space you saved earlier. After loading, slowly move the camera around the same area so it can be recognized — your memos will then reappear in their original spots." = "以前保存した空間を復元します。ロード後はカメラをゆっくり動かして同じ場所を映してください。空間が認識されると、メモが元の位置に再表示されます。";
+
 /* MemoListView */
 "Memos" = "メモ一覧";
 "Close" = "閉じる";
