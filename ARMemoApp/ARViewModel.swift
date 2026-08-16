@@ -2,6 +2,7 @@ import SwiftUI
 import RealityKit
 import ARKit
 import Combine
+import UIKit
 
 /// ARSessionの状態、メモの配置/編集/削除、ARWorldMapの保存/復元を管理する。
 final class ARViewModel: NSObject, ObservableObject {
@@ -16,6 +17,8 @@ final class ARViewModel: NSObject, ObservableObject {
 
     private var pendingPlacementTransform: simd_float4x4?
     private var anchorEntities: [UUID: AnchorEntity] = [:]
+    private var planeAnchorEntities: [UUID: AnchorEntity] = [:]
+    private var sceneUpdateSubscription: Cancellable?
 
     private let worldMapURL: URL = {
         let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -25,6 +28,23 @@ final class ARViewModel: NSObject, ObservableObject {
     func attach(arView: ARView) {
         self.arView = arView
         arView.session.delegate = self
+        sceneUpdateSubscription = arView.scene.subscribe(to: SceneEvents.Update.self) { [weak self] _ in
+            self?.updateMemoBillboards()
+        }
+    }
+
+    /// 机（水平面）に置いたメモも寝転がらないよう、毎フレーム縦軸まわりでカメラの方を向かせる。
+    private func updateMemoBillboards() {
+        guard let arView = arView else { return }
+        let cameraPosition = arView.cameraTransform.translation
+        for anchorEntity in anchorEntities.values {
+            guard let container = anchorEntity.children.first else { continue }
+            let containerPosition = container.position(relativeTo: nil)
+            let direction = cameraPosition - containerPosition
+            guard direction.x != 0 || direction.z != 0 else { continue }
+            let yaw = atan2(direction.x, direction.z)
+            container.orientation = simd_quatf(angle: yaw, axis: SIMD3<Float>(0, 1, 0))
+        }
     }
 
     // MARK: - 配置フロー（Step 2, 3）
@@ -105,6 +125,34 @@ final class ARViewModel: NSObject, ObservableObject {
         memoAnchorsByID[id] = nil
     }
 
+    // MARK: - 検知した平面の可視化
+
+    /// 検知済みの平面を半透明で表示し、どこが認識されているか分かるようにする。
+    private func updatePlaneVisual(for planeAnchor: ARPlaneAnchor) {
+        guard let arView = arView else { return }
+        let mesh = MeshResource.generatePlane(width: planeAnchor.extent.x, depth: planeAnchor.extent.z)
+        let material = UnlitMaterial(color: UIColor.white.withAlphaComponent(0.25))
+        let planeModel = ModelEntity(mesh: mesh, materials: [material])
+        planeModel.position = planeAnchor.center
+
+        if let existingAnchorEntity = planeAnchorEntities[planeAnchor.identifier] {
+            existingAnchorEntity.children.forEach { $0.removeFromParent() }
+            existingAnchorEntity.addChild(planeModel)
+        } else {
+            let anchorEntity = AnchorEntity(anchor: planeAnchor)
+            anchorEntity.addChild(planeModel)
+            arView.scene.addAnchor(anchorEntity)
+            planeAnchorEntities[planeAnchor.identifier] = anchorEntity
+        }
+    }
+
+    private func removePlaneVisual(for id: UUID) {
+        if let anchorEntity = planeAnchorEntities[id] {
+            arView?.scene.removeAnchor(anchorEntity)
+            planeAnchorEntities[id] = nil
+        }
+    }
+
     // MARK: - 空間の保存・復元（Step 4）
 
     func saveWorldMap() {
@@ -166,25 +214,38 @@ extension ARViewModel: ARSessionDelegate {
     func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
         guard let arView = arView else { return }
         for anchor in anchors {
-            guard let memoAnchor = anchor as? MemoAnchor else { continue }
-            memoAnchorsByID[memoAnchor.identifier] = memoAnchor
+            if let memoAnchor = anchor as? MemoAnchor {
+                memoAnchorsByID[memoAnchor.identifier] = memoAnchor
 
-            let entity = MemoEntityFactory.makeMemoEntity(
-                text: memoAnchor.text,
-                textColorHex: memoAnchor.textColorHex,
-                backgroundColorHex: memoAnchor.backgroundColorHex
-            )
-            let anchorEntity = AnchorEntity(anchor: memoAnchor)
-            anchorEntity.addChild(entity)
-            arView.scene.addAnchor(anchorEntity)
-            anchorEntities[memoAnchor.identifier] = anchorEntity
+                let entity = MemoEntityFactory.makeMemoEntity(
+                    text: memoAnchor.text,
+                    textColorHex: memoAnchor.textColorHex,
+                    backgroundColorHex: memoAnchor.backgroundColorHex
+                )
+                let anchorEntity = AnchorEntity(anchor: memoAnchor)
+                anchorEntity.addChild(entity)
+                arView.scene.addAnchor(anchorEntity)
+                anchorEntities[memoAnchor.identifier] = anchorEntity
+            } else if let planeAnchor = anchor as? ARPlaneAnchor {
+                updatePlaneVisual(for: planeAnchor)
+            }
+        }
+    }
+
+    func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
+        for anchor in anchors {
+            guard let planeAnchor = anchor as? ARPlaneAnchor else { continue }
+            updatePlaneVisual(for: planeAnchor)
         }
     }
 
     func session(_ session: ARSession, didRemove anchors: [ARAnchor]) {
         for anchor in anchors {
-            guard anchor is MemoAnchor else { continue }
-            removeVisual(for: anchor.identifier)
+            if anchor is MemoAnchor {
+                removeVisual(for: anchor.identifier)
+            } else if anchor is ARPlaneAnchor {
+                removePlaneVisual(for: anchor.identifier)
+            }
         }
     }
 }
