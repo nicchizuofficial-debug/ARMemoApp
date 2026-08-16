@@ -27,6 +27,7 @@ targets:
         UIRequiredDeviceCapabilities:
           - arm64
           - arkit
+        ITSAppUsesNonExemptEncryption: false
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nicchizu.armemoapp
