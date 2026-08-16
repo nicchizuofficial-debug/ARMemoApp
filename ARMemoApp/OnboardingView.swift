@@ -26,7 +26,7 @@ struct OnboardingView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
-                    ForEach(items, id: \.title) { item in
+                    ForEach(items, id: \.icon) { item in
                         HStack(alignment: .top, spacing: 16) {
                             Image(systemName: item.icon)
                                 .font(.title2)
