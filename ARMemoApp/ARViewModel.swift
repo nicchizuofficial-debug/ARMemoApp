@@ -9,6 +9,7 @@ final class ARViewModel: NSObject, ObservableObject {
     @Published var isModalPresented = false
     @Published var statusMessage: String = ""
     @Published var selectedMemoForAction: MemoAnchor?
+    @Published private(set) var memoOrder: [UUID] = []
 
     private(set) var editingMemoID: UUID?
     private(set) var memoAnchorsByID: [UUID: MemoAnchor] = [:]
@@ -123,6 +124,7 @@ final class ARViewModel: NSObject, ObservableObject {
             anchorEntities[id] = nil
         }
         memoAnchorsByID[id] = nil
+        memoOrder.removeAll { $0 == id }
     }
 
     // MARK: - 検知した平面の可視化
@@ -216,6 +218,7 @@ extension ARViewModel: ARSessionDelegate {
         for anchor in anchors {
             if let memoAnchor = anchor as? MemoAnchor {
                 memoAnchorsByID[memoAnchor.identifier] = memoAnchor
+                memoOrder.append(memoAnchor.identifier)
 
                 let entity = MemoEntityFactory.makeMemoEntity(
                     text: memoAnchor.text,

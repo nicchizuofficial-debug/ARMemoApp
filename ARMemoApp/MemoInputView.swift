@@ -40,14 +40,17 @@ struct MemoInputView: View {
 
                 Section("Preview") {
                     ZStack {
-                        RoundedRectangle(cornerRadius: 8)
+                        RoundedRectangle(cornerRadius: 16)
                             .fill(backgroundColor)
+                            .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
                         Text(text.isEmpty ? String(localized: "Preview") : text)
                             .foregroundColor(textColor)
-                            .padding(12)
+                            .padding(16)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(minHeight: 60)
+                    .frame(minHeight: 70)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 4, bottom: 8, trailing: 4))
                 }
             }
             .navigationTitle("Place Memo")

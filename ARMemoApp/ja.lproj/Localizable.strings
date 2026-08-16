@@ -17,6 +17,12 @@
 "Place Memo" = "メモを配置";
 "Place" = "配置する";
 
+/* MemoListView */
+"Memos" = "メモ一覧";
+"Close" = "閉じる";
+"No Memos Yet" = "まだメモがありません";
+"Memos you place in space will appear here." = "空間に配置したメモがここに表示されます。";
+
 /* ARViewModel status messages */
 "No plane detected. Point the camera at a desk or wall." = "平面が検出されていません。カメラを机や壁に向けてください。";
 "Save failed" = "保存に失敗しました";
