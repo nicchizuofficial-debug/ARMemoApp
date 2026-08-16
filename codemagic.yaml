@@ -52,6 +52,8 @@ workflows:
       vars:
         XCODE_SCHEME: "ARMemoApp"
         BUNDLE_ID: "com.nicchizu.armemoapp"
+        # App Store Connect上のApp ID（数値）。appstoreconnect.apple.com/apps/<この数字>/... のURLから確認。
+        APP_STORE_APP_ID: "6801956816"
       xcode: latest
     scripts:
       - name: Install XcodeGen
@@ -62,7 +64,7 @@ workflows:
           xcodegen generate
       - name: Set next build number
         script: |
-          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-testflight-build-number "$BUNDLE_ID" || echo 0)
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APP_ID" || echo 0)
           agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
       - name: Set up code signing settings
         script: |
