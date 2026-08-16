@@ -35,6 +35,13 @@ workflows:
   #      （登録名を下記 integrations.app_store_connect と合わせる。現在は "Codemagic"）
   #   2. bundle_identifier (com.nicchizu.armemoapp) をApple Developerポータルで払い出す
   #   3. 実機のUDIDをApple Developer Portal > Devices に登録する
+  #
+  # NOTE: environment.ios_signing の distribution_type/bundle_identifier を使う
+  # 「自動」方式では、証明書・プロファイルの取得はCodemagicがビルド開始前に
+  # 裏側で自動的に行う。app-store-connect fetch-signing-files を自分のscriptsで
+  # 明示的に呼ぶ「手動」方式と混在させると状態が壊れて
+  # "No matching profiles found" になるため、ここでは自動方式のみを使う
+  # （fetch-signing-files / keychain系のscriptは書かない）。
   ios-device-build:
     name: "AR Memo - iOS Device Build (Development)"
     max_build_duration: 60
@@ -47,7 +54,6 @@ workflows:
         bundle_identifier: com.nicchizu.armemoapp
       vars:
         XCODE_SCHEME: "ARMemoApp"
-        BUNDLE_ID: "com.nicchizu.armemoapp"
       xcode: latest
     scripts:
       - name: Install XcodeGen
@@ -56,17 +62,6 @@ workflows:
       - name: Generate Xcode project
         script: |
           xcodegen generate
-      - name: Set up keychain
-        script: |
-          keychain initialize
-      - name: Fetch signing files
-        script: |
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_DEVELOPMENT \
-            --create
-      - name: Add certificates to keychain
-        script: |
-          keychain add-certificates
       - name: Set up code signing settings
         script: |
           xcode-project use-profiles
