@@ -1,8 +1,8 @@
-# AR Memo App
+# AiRnote
 
 `Claude_App_Requirements_AR_Memo.md` の仕様に基づいた、空間メモアプリ（iOS / SwiftUI + ARKit + RealityKit）です。
 
-現実空間の平面（机・壁など）にテキストメモを配置し、`ARWorldMap` を使って空間ごと保存・復元します。
+現実空間の平面（机・壁など）にテキストメモを配置し、`ARWorldMap` を使って空間ごと保存・復元します。日本語・英語に対応しています（端末の言語設定に応じて自動切り替え、既定は英語）。
 
 ## 実装内容（仕様書のStep 1〜4に対応）
 
@@ -34,6 +34,7 @@ ARMemoApp/
     ├── MemoEntityFactory.swift# テキスト+背景カードの3Dエンティティ生成
     ├── MemoInputView.swift    # メモ入力モーダル
     ├── ColorHex.swift         # UIColor/Color <-> hex文字列 変換
+    ├── ja.lproj/              # 日本語ローカライズ（既定言語は英語）
     └── Assets.xcassets/
 ```
 
@@ -49,18 +50,22 @@ Apple Developer Programへの登録がなくても実行できます。push の�
 2. Codemagicで新規アプリとして接続
 3. `codemagic.yaml` が自動検出されるので、ワークフロー `ios-build-check` を実行
 
-### 2. `ios-device-build`（実機インストール用の署名付きIPA）
+### 2. `ios-device-build`（TestFlight配信）
 
 ARKitはシミュレータのカメラでは動作しないため、実機で試すにはこちらが必要です。**Apple Developer Program（有料）への登録が必要です。**
 
-事前準備（Codemagicの管理画面）:
+Ad Hoc/Development配信ではなく、TestFlight（App Store配信）経由でのインストールを採用しています。デバイスのUDID事前登録が不要なため、セットアップがシンプルです。
+
+事前準備:
 
 1. Apple Developer Portal で App Store Connect API Key を発行
 2. Codemagic > Team settings > Integrations > Apple Developer Portal に登録
-   （登録した名前を `codemagic.yaml` の `integrations.app_store_connect` の値 `codemagic_api_key` と一致させる、または実際の登録名に書き換える）
+   （登録した名前を `codemagic.yaml` の `integrations.app_store_connect` の値と一致させる。現在は `"Codemagic"`）
 3. Apple Developer Portal で Bundle ID `com.nicchizu.armemoapp` を払い出す
    （変更する場合は `project.yml` の `PRODUCT_BUNDLE_IDENTIFIER` と `codemagic.yaml` の `bundle_identifier` を両方書き換えてください）
-4. ワークフロー `ios-device-build` を実行 → 生成された `.ipa` は Ad Hoc配布（登録済み端末へのインストール）または TestFlight経由で実機にインストールできます
+4. App Store Connect で、同じBundle IDのAppレコードを作成（審査には出さず、TestFlightの配信先として使うだけ）
+5. ワークフロー `ios-device-build` を実行 → ビルド成功後、自動的にTestFlightへアップロードされる
+6. アカウント保有者は内部テスターとして自動的にアクセス可能。iPhoneのTestFlightアプリからインストールできます
 
 ## ローカル（Mac）で試す場合
 

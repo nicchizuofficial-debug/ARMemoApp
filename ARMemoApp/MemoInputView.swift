@@ -28,21 +28,21 @@ struct MemoInputView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("メモの内容") {
-                    TextField("テキストを入力", text: $text, axis: .vertical)
+                Section("Memo Content") {
+                    TextField("Enter text", text: $text, axis: .vertical)
                         .lineLimit(3...6)
                 }
 
-                Section("見た目") {
-                    ColorPicker("文字色", selection: $textColor, supportsOpacity: false)
-                    ColorPicker("背景色", selection: $backgroundColor, supportsOpacity: false)
+                Section("Appearance") {
+                    ColorPicker("Text Color", selection: $textColor, supportsOpacity: false)
+                    ColorPicker("Background Color", selection: $backgroundColor, supportsOpacity: false)
                 }
 
-                Section("プレビュー") {
+                Section("Preview") {
                     ZStack {
                         RoundedRectangle(cornerRadius: 8)
                             .fill(backgroundColor)
-                        Text(text.isEmpty ? "プレビュー" : text)
+                        Text(text.isEmpty ? String(localized: "Preview") : text)
                             .foregroundColor(textColor)
                             .padding(12)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -50,17 +50,17 @@ struct MemoInputView: View {
                     .frame(minHeight: 60)
                 }
             }
-            .navigationTitle("メモを配置")
+            .navigationTitle("Place Memo")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("キャンセル") {
+                    Button("Cancel") {
                         onCancel()
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("配置する") {
+                    Button("Place") {
                         onConfirm(text, UIColor(textColor).hexString, UIColor(backgroundColor).hexString)
                         dismiss()
                     }

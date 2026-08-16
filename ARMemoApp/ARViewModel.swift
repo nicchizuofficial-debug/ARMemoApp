@@ -35,7 +35,7 @@ final class ARViewModel: NSObject, ObservableObject {
         let center = arView.center
         let results = arView.raycast(from: center, allowing: .estimatedPlane, alignment: .any)
         guard let result = results.first else {
-            statusMessage = "平面が検出されていません。カメラを机や壁に向けてください。"
+            statusMessage = String(localized: "No plane detected. Point the camera at a desk or wall.")
             return
         }
         pendingPlacementTransform = result.worldTransform
@@ -113,17 +113,20 @@ final class ARViewModel: NSObject, ObservableObject {
             guard let self = self else { return }
             guard let map = worldMap else {
                 DispatchQueue.main.async {
-                    self.statusMessage = "保存に失敗しました: \(error?.localizedDescription ?? "不明なエラー")"
+                    let reason = error?.localizedDescription ?? String(localized: "Unknown error")
+                    self.statusMessage = "\(String(localized: "Save failed")): \(reason)"
                 }
                 return
             }
             do {
                 let data = try NSKeyedArchiver.archivedData(withRootObject: map, requiringSecureCoding: true)
                 try data.write(to: self.worldMapURL, options: .atomic)
-                DispatchQueue.main.async { self.statusMessage = "空間を保存しました（メモ \(map.anchors.count)件）" }
+                DispatchQueue.main.async {
+                    self.statusMessage = "\(String(localized: "Space saved")) (\(map.anchors.count))"
+                }
             } catch {
                 DispatchQueue.main.async {
-                    self.statusMessage = "保存に失敗しました: \(error.localizedDescription)"
+                    self.statusMessage = "\(String(localized: "Save failed")): \(error.localizedDescription)"
                 }
             }
         }
@@ -132,13 +135,13 @@ final class ARViewModel: NSObject, ObservableObject {
     func loadWorldMap() {
         guard let arView = arView else { return }
         guard FileManager.default.fileExists(atPath: worldMapURL.path) else {
-            statusMessage = "保存された空間がありません"
+            statusMessage = String(localized: "No saved space found")
             return
         }
         do {
             let data = try Data(contentsOf: worldMapURL)
             guard let worldMap = try NSKeyedUnarchiver.unarchivedObject(ofClass: ARWorldMap.self, from: data) else {
-                statusMessage = "空間の読み込みに失敗しました"
+                statusMessage = String(localized: "Failed to load space")
                 return
             }
 
@@ -150,9 +153,9 @@ final class ARViewModel: NSObject, ObservableObject {
             config.planeDetection = [.horizontal, .vertical]
             config.initialWorldMap = worldMap
             arView.session.run(config, options: [.resetTracking, .removeExistingAnchors])
-            statusMessage = "空間を読み込みました。カメラをゆっくり動かして周囲を確認してください。"
+            statusMessage = String(localized: "Space loaded. Slowly move the camera to look around.")
         } catch {
-            statusMessage = "空間の読み込みに失敗しました: \(error.localizedDescription)"
+            statusMessage = "\(String(localized: "Failed to load space")): \(error.localizedDescription)"
         }
     }
 }

@@ -1,0 +1,27 @@
+/* ContentView */
+"Save Space" = "空間を保存";
+"Load Space" = "空間をロード";
+"Add Memo" = "メモを追加";
+"Edit Memo" = "メモを編集";
+"Edit" = "編集";
+"Delete" = "削除";
+"Cancel" = "キャンセル";
+
+/* MemoInputView */
+"Memo Content" = "メモの内容";
+"Enter text" = "テキストを入力";
+"Appearance" = "見た目";
+"Text Color" = "文字色";
+"Background Color" = "背景色";
+"Preview" = "プレビュー";
+"Place Memo" = "メモを配置";
+"Place" = "配置する";
+
+/* ARViewModel status messages */
+"No plane detected. Point the camera at a desk or wall." = "平面が検出されていません。カメラを机や壁に向けてください。";
+"Save failed" = "保存に失敗しました";
+"Unknown error" = "不明なエラー";
+"Space saved" = "空間を保存しました";
+"No saved space found" = "保存された空間がありません";
+"Failed to load space" = "空間の読み込みに失敗しました";
+"Space loaded. Slowly move the camera to look around." = "空間を読み込みました。カメラをゆっくり動かして周囲を確認してください。";

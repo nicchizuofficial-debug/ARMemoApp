@@ -19,7 +19,7 @@ struct ContentView: View {
                     Button {
                         viewModel.saveWorldMap()
                     } label: {
-                        Label("空間を保存", systemImage: "square.and.arrow.down")
+                        Label("Save Space", systemImage: "square.and.arrow.down")
                     }
                     .buttonStyle(.borderedProminent)
 
@@ -28,7 +28,7 @@ struct ContentView: View {
                     Button {
                         viewModel.loadWorldMap()
                     } label: {
-                        Label("空間をロード", systemImage: "square.and.arrow.up")
+                        Label("Load Space", systemImage: "square.and.arrow.up")
                     }
                     .buttonStyle(.borderedProminent)
                 }
@@ -48,7 +48,7 @@ struct ContentView: View {
                 Button {
                     viewModel.requestPlacementFromCenter()
                 } label: {
-                    Label("メモを追加", systemImage: "note.text.badge.plus")
+                    Label("Add Memo", systemImage: "note.text.badge.plus")
                         .font(.headline)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
@@ -72,26 +72,26 @@ struct ContentView: View {
             )
         }
         .confirmationDialog(
-            "メモを編集",
+            "Edit Memo",
             isPresented: Binding(
                 get: { viewModel.selectedMemoForAction != nil },
                 set: { if !$0 { viewModel.selectedMemoForAction = nil } }
             ),
             titleVisibility: .visible
         ) {
-            Button("編集") {
+            Button("Edit") {
                 if let anchor = viewModel.selectedMemoForAction {
                     viewModel.requestEdit(for: anchor)
                 }
                 viewModel.selectedMemoForAction = nil
             }
-            Button("削除", role: .destructive) {
+            Button("Delete", role: .destructive) {
                 if let anchor = viewModel.selectedMemoForAction {
                     viewModel.deleteMemo(anchor)
                 }
                 viewModel.selectedMemoForAction = nil
             }
-            Button("キャンセル", role: .cancel) {
+            Button("Cancel", role: .cancel) {
                 viewModel.selectedMemoForAction = nil
             }
         }
