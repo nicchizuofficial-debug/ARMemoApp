@@ -52,10 +52,15 @@ final class ARViewModel: NSObject, ObservableObject {
     // MARK: - 配置フロー（Step 2, 3）
 
     /// 画面中央のクロスヘア位置からレイキャストし、検知済みの平面にヒットしたら入力モーダルを開く。
+    /// 確定済みの平面（existingPlaneGeometry）を優先することで、まだ確定していない
+    /// 推定平面（estimatedPlane）だけを使う場合より配置位置のブレを抑える。
     func requestPlacementFromCenter() {
         guard let arView = arView else { return }
         let center = arView.center
-        let results = arView.raycast(from: center, allowing: .estimatedPlane, alignment: .any)
+        var results = arView.raycast(from: center, allowing: .existingPlaneGeometry, alignment: .any)
+        if results.isEmpty {
+            results = arView.raycast(from: center, allowing: .estimatedPlane, alignment: .any)
+        }
         guard let result = results.first else {
             statusMessage = String(localized: "No plane detected. Point the camera at a desk or wall.")
             return
