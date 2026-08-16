@@ -24,36 +24,35 @@ workflows:
             -destination "generic/platform=iOS" \
             CODE_SIGNING_ALLOWED=NO
 
-  # 実機インストール用の署名付きIPAビルド。
+  # TestFlight配信用の署名付きIPAビルド。
   # ARKitはシミュレータのカメラでは動作しないため、実機確認にはこちらが必要です。
-  # Apple Distribution証明書は1アカウント2枚までの上限があり、他プロジェクトで
-  # 既に消費されている可能性があるため、上限が緩いApple Development証明書
-  # （development配布）を使って実機に直接インストールする方式にしている。
-  # 事前準備（Codemagicの管理画面）:
+  # Ad Hoc/Development配信は実機のUDID事前登録が必要で扱いが煩雑なため、
+  # 他プロジェクト（kaudoki等）と同じくTestFlight経由（app_store配信）で
+  # 実機にインストールする方式にしている。デバイス登録は不要。
+  # 事前準備（Codemagicの管理画面 / App Store Connect）:
   #   1. Apple Developer Programに登録したチームでApp Store Connect API Keyを発行し、
   #      Codemagic > Team settings > Integrations > Apple Developer Portal に登録する
   #      （登録名を下記 integrations.app_store_connect と合わせる。現在は "Codemagic"）
   #   2. bundle_identifier (com.nicchizu.armemoapp) をApple Developerポータルで払い出す
-  #   3. 実機のUDIDをApple Developer Portal > Devices に登録する
+  #   3. App Store Connectで、同じBundle IDのApp（TestFlight配信先）を作成しておく
   #
   # NOTE: environment.ios_signing の distribution_type/bundle_identifier を使う
   # 「自動」方式では、証明書・プロファイルの取得はCodemagicがビルド開始前に
   # 裏側で自動的に行う。app-store-connect fetch-signing-files を自分のscriptsで
-  # 明示的に呼ぶ「手動」方式と混在させると状態が壊れて
-  # "No matching profiles found" になるため、ここでは自動方式のみを使う
-  # （fetch-signing-files / keychain系のscriptは書かない）。
+  # 明示的に呼ぶ「手動」方式と混在させると状態が壊れるため、自動方式のみを使う。
   ios-device-build:
-    name: "AR Memo - iOS Device Build (Development)"
+    name: "AR Memo - iOS TestFlight Build"
     max_build_duration: 60
     instance_type: mac_mini_m2
     integrations:
       app_store_connect: Codemagic
     environment:
       ios_signing:
-        distribution_type: development
+        distribution_type: app_store
         bundle_identifier: com.nicchizu.armemoapp
       vars:
         XCODE_SCHEME: "ARMemoApp"
+        BUNDLE_ID: "com.nicchizu.armemoapp"
       xcode: latest
     scripts:
       - name: Install XcodeGen
@@ -62,6 +61,10 @@ workflows:
       - name: Generate Xcode project
         script: |
           xcodegen generate
+      - name: Set next build number
+        script: |
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-testflight-build-number "$BUNDLE_ID" || echo 0)
+          agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
       - name: Set up code signing settings
         script: |
           xcode-project use-profiles
@@ -80,3 +83,6 @@ workflows:
         notify:
           success: true
           failure: true
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
