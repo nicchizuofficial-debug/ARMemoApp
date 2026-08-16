@@ -18,12 +18,12 @@ targets:
     info:
       path: Generated/Info.plist
       properties:
-        CFBundleDisplayName: "AiRnote"
+        CFBundleDisplayName: "mARk"
         UILaunchScreen: {}
         UIRequiresFullScreen: true
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
-        NSCameraUsageDescription: "AiRnote uses the camera to place and display memos in real space."
+        NSCameraUsageDescription: "mARk uses the camera to place and display memos in real space."
         UIRequiredDeviceCapabilities:
           - arm64
           - arkit

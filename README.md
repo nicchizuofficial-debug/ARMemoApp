@@ -1,4 +1,4 @@
-# AiRnote
+# mARk
 
 `Claude_App_Requirements_AR_Memo.md` の仕様に基づいた、空間メモアプリ（iOS / SwiftUI + ARKit + RealityKit）です。
 
